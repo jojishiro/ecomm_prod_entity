@@ -1,1 +1,1 @@
-# ecomm_prod_entity
+# Ecomm Product Entity
