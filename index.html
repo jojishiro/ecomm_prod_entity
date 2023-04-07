@@ -55,6 +55,7 @@
 
     _('kmodal_submit').addEventListener('click', () => {
         var data = {
+            key: '6bef8098d5b6f35b8efd79d456303257acd89f05',
             upd: 'upd-prod', 
             stock: '',
             title: _('pname').value, 
@@ -78,7 +79,7 @@
     });
 
     async function populate() {
-        var products = await fetch('api/api.php?products=all')
+        var products = await fetch('api/api.php?products=all&key=6bef8098d5b6f35b8efd79d456303257acd89f05')
             .then(response => response.json())
             .then(data => { return data; });
         
@@ -114,7 +115,7 @@
 
     function remove_product(id) {
         if (confirm('Are you sure that you want to remove the product of id #' + id + ' ?')){
-            fetch('api/api.php?remid='+id)
+            fetch('api/api.php?remid='+id+'&key=6bef8098d5b6f35b8efd79d456303257acd89f05')
                 .then(response => response.json())
                 .then(json => {
                     console.log(json)
@@ -139,6 +140,7 @@
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    key: '6bef8098d5b6f35b8efd79d456303257acd89f05',
                     inp: 'in-prod', 
                     stock: 50, 
                     title: pname, 
@@ -162,7 +164,7 @@
 
     function edit_product(id) {
        
-        fetch('api/api.php?id='+id)
+        fetch('api/api.php?id='+id+'&key=6bef8098d5b6f35b8efd79d456303257acd89f05')
         .then(response => response.json())
         .then(json => {
             if (json.length>0) {
