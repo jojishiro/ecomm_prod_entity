@@ -1,6 +1,7 @@
 # The ECPR (Ecomm Product Entity)
 This is an experimental client for managing products of an ecommerce entity.
-It communicates with a custom API built from scratch.
+It communicates with a custom API built from scratch with 
+plain PHP 7 \w PDO and MySQL. The client was built using Vanilla JavaScript, AJAX and Bootstrap 5.
 
 ![Image 1](image_1.png)
 ![Image 2](image_2.png)
