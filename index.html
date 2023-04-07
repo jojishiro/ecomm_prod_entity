@@ -1,0 +1,182 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    .group {
+        display: flex;
+    }
+    .item {
+        flex: 1;
+    }
+    #kmodal {
+        position: absolute;
+        top: 3em;
+        left: 35%;
+        right: 35%;
+        height: auto;
+        background: #fff;
+        border: 1px solid #eee;
+        box-shadow: 0 4px 5px #ccc;
+        border-radius: 5px;
+        padding: 2em;
+        display: none;
+    }
+</style>
+<div class="row">
+    <div class="col text-center p-3">
+        <h2 class="text-muted">The ECPR (Ecomm Product Entity) <i class="fa fa-code"></i></h2>
+        <p>This is an experimental client for managing products of an ecommerce entity.<br>It communicates with 
+            a custom API built from scratch.
+        </p>
+    </div>
+</div>
+<hr>
+<div id="app" class="p-4"></div>
+
+<div id="kmodal">
+    <input type="hidden" id="pid">
+    <input type="text" id="pname" class="form-control mb-2">
+    <input type="text" id="pprice" class="form-control mb-2">
+    <button id="kmodal_submit" class="btn btn-success btn-sm">Save Changes <i class="fa fa-floppy-o"></i></button>
+    <a id="dismiss" class="text-danger p-1" style="text-decoration: none;cursor: pointer;">Cancel</a>
+</div>
+
+<script>
+
+    _ = (id) => {
+        return document.getElementById(id);
+    }
+
+    _('dismiss').addEventListener('click', () => {
+        _('kmodal').style.display = 'none';
+    });
+
+    _('kmodal_submit').addEventListener('click', () => {
+        var data = {
+            upd: 'upd-prod', 
+            stock: '',
+            title: _('pname').value, 
+            subtitle: '',
+            img: '',
+            price: _('pprice').value,
+            discount: '',
+            id: _('pid').value
+        };
+         fetch('api/api.php', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(json => {
+                console.log(json)
+                populate();
+                _('kmodal').style.display = 'none';
+            });
+    });
+
+    async function populate() {
+        var products = await fetch('api/api.php?products=all')
+            .then(response => response.json())
+            .then(data => { return data; });
+        
+
+        if (products.length>0){
+            
+            var cont = '<table class="table table-bordered table-condensed">';
+            cont += '<tr><td style="width: 3%">ID</td><td>Product Name</td>\
+                    <td style="width: 20%;">Product Price</td>\
+                    <td style="width: 5%;">Actions</td></tr>';
+            cont += '<tr>\
+                        <td></td>\
+                        <td><input type="text" id="productName" class="form-control" placeholder="Add product name"/></td>\
+                        <td><input type="text" id="productPrice" class="form-control" placeholder="Add product price"/></td>\
+                        <td><button onclick="add_product()" class="btn btn-primary btn-sm"><i class="fa fa-plus-square"></i></button>\
+                    </tr>';
+            products.forEach((elem) => {
+                cont += '<tr>';
+                cont += '<td>'+elem.id+'</td>';
+                cont += '<td>'+elem.title+'</td>';
+                cont += '<td>'+elem.price+'&euro;</td>';
+                cont += '<td>\
+                            <a href="#" onclick="remove_product('+elem.id+')" class="btn btn-danger btn-sm"><i class="fa fa-close"></i></a>\
+                            <a href="#" onclick="edit_product('+elem.id+')" class="btn btn-warning btn-sm"><i class="fa fa-cog"></i></a>\
+                            \
+                        </td>';
+                cont += '</tr>';
+            });
+            cont += '</table>';
+            _('app').innerHTML = cont;
+        }
+    }
+
+    function remove_product(id) {
+        if (confirm('Are you sure that you want to remove the product of id #' + id + ' ?')){
+            fetch('api/api.php?remid='+id)
+                .then(response => response.json())
+                .then(json => {
+                    console.log(json)
+                    populate();
+                });            
+            
+        } 
+        
+        return false;
+    }
+
+    function add_product() {
+        var flag = false;
+        var pname = _('productName').value;
+        var pprice = _('productPrice').value;
+        pname = pname.trim();
+        pprice = pprice.trim();    
+        flag = ((pname.length > 5 && pname) && (parseFloat(pprice) > 0 && pprice)) ? true : false;
+        
+        if (flag) {
+            fetch('api/api.php', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    inp: 'in-prod', 
+                    stock: 50, 
+                    title: pname, 
+                    subtitle: 'some subtitle', 
+                    img: 'no_image.png', 
+                    price: pprice, 
+                    discount: 0
+                })
+            })
+            .then(response => response.json())
+            .then(json => {
+                console.log(json)
+                populate();
+            });
+        } else {
+            alert('Invalid fields. Please enter a product name and a price.');
+        }
+        return false;
+    }
+
+
+    function edit_product(id) {
+       
+        fetch('api/api.php?id='+id)
+        .then(response => response.json())
+        .then(json => {
+            if (json.length>0) {
+                _('pprice').value = json[0].price;
+                _('pname').value = json[0].title;
+                _('pid').value = id;
+            }
+        })
+        _('kmodal').style.display = 'block';
+    }
+
+    window.onload = () => {
+        populate();
+        
+    }
+
+</script>
